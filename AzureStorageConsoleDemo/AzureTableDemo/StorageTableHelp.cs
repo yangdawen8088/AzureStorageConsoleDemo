@@ -76,14 +76,14 @@ namespace AzureStorageConsoleDemo.AzureTableDemo
         {
             await table.DeleteIfExistsAsync();
         }
-
         /// <summary>
         /// 插入数据，如果分区与行键值相同则修改该条数据
         /// </summary>
-        /// <param name="table">CloudTable</param>
-        /// <param name="entity">WorkerModel</param>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="table"></param>
+        /// <param name="entity"></param>
         /// <returns></returns>
-        public static async Task<WorkerModel> InsertOrMergeEntityAsync(CloudTable table, WorkerModel entity)
+        public static async Task<T> InsertOrMergeEntityAsync<T>(CloudTable table, T entity) where T : TableEntity
         {
             if (entity == null)
             {
@@ -95,8 +95,7 @@ namespace AzureStorageConsoleDemo.AzureTableDemo
                 TableOperation insertOrMergeOperation = TableOperation.InsertOrMerge(entity);
                 // 执行操作。
                 TableResult result = await table.ExecuteAsync(insertOrMergeOperation);
-                WorkerModel insertedCustomer = result.Result as WorkerModel;
-                return insertedCustomer;
+                return result.Result as T;
             }
             catch (StorageException e)
             {
@@ -107,19 +106,20 @@ namespace AzureStorageConsoleDemo.AzureTableDemo
         /// <summary>
         /// 通过 partitionKey 与 rowKey 检索一条数据
         /// </summary>
+        /// <typeparam name="T">实体模型</typeparam>
         /// <param name="table">CloudTable</param>
         /// <param name="partitionKey">partitionKey</param>
         /// <param name="rowKey">rowKey</param>
-        /// <returns>WorkerModel</returns>
-        public static async Task<WorkerModel> RetrieveEntityUsingPointQueryAsync(CloudTable table, string partitionKey, string rowKey)
+        /// <returns></returns>
+        public static async Task<T> RetrieveEntityUsingPointQueryAsync<T>(CloudTable table, string partitionKey, string rowKey) where T : TableEntity
         {
             try
             {
-                TableOperation retrieveOperation = TableOperation.Retrieve<WorkerModel>(partitionKey, rowKey);
+                TableOperation retrieveOperation = TableOperation.Retrieve<T>(partitionKey, rowKey);
                 TableResult result = await table.ExecuteAsync(retrieveOperation);
-                if (result.Result is WorkerModel customer)
+                if (result.Result is T customer)
                 {
-                    return customer;
+                    return result.Result as T;
                 }
                 return null;
             }
@@ -132,10 +132,11 @@ namespace AzureStorageConsoleDemo.AzureTableDemo
         /// <summary>
         /// 删除一条数据
         /// </summary>
+        /// <typeparam name="T"></typeparam>
         /// <param name="table">CloudTable</param>
-        /// <param name="deleteEntity">WorkerModel</param>
+        /// <param name="deleteEntity">数据对象</param>
         /// <returns></returns>
-        public static async Task DeleteEntityAsync(CloudTable table, WorkerModel deleteEntity)
+        public static async Task DeleteEntityAsync<T>(CloudTable table, T deleteEntity) where T : TableEntity
         {
             try
             {
@@ -150,6 +151,88 @@ namespace AzureStorageConsoleDemo.AzureTableDemo
             {
                 throw new StorageException(e.Message);
             }
+        }
+
+        /// <summary>
+        /// 列出 CloudTableClient 下所有的数据表
+        /// </summary>
+        /// <param name="tableClient">CloudTableClient</param>
+        /// <returns></returns>
+        public static IEnumerable<CloudTable> ListTables(CloudTableClient tableClient)
+        {
+            try
+            {
+                return tableClient.ListTables();
+            }
+            catch (StorageException e)
+            {
+                throw new StorageException(e.Message);
+            }
+        }
+
+        /// <summary>
+        /// 列出 CloudTableClient 下所有名称以 prefix 开头的数据表
+        /// </summary>
+        /// <param name="tableClient">CloudTableClient</param>
+        /// <param name="prefix"></param>
+        /// <returns></returns>
+        public static IEnumerable<CloudTable> ListTables(CloudTableClient tableClient, string prefix)
+        {
+            try
+            {
+                TableContinuationToken continuationToken = null;
+                TableResultSegment resultSegment = tableClient.ListTablesSegmented(prefix, continuationToken);
+                return resultSegment.Results;
+            }
+            catch (StorageException e)
+            {
+                throw new StorageException(e.Message);
+            }
+        }
+
+        /// <summary>
+        /// 批量插入数据
+        /// </summary>
+        /// <typeparam name="T">实体模型</typeparam>
+        /// <param name="table">CloudTable</param>
+        /// <param name="entityList">数据集</param>
+        /// <returns></returns>
+        public static async Task<TableBatchResult> BatchInsertEntitiesAsync<T>(CloudTable table, List<T> entityList) where T : TableEntity
+        {
+            try
+            {
+                // 创建批处理操作。
+                TableBatchOperation batchOperation = new TableBatchOperation();
+                // 将需要插入的数据加入到批处理操作中
+                entityList.ForEach(entity =>
+                {
+                    batchOperation.Insert(entity);
+                });
+                // 执行批处理操作。
+                TableBatchResult results = await table.ExecuteBatchAsync(batchOperation);
+                return results;
+            }
+            catch (StorageException e)
+            {
+                throw new StorageException(e.Message);
+            }
+        }
+
+        /// <summary>
+        /// 查询一个分区中的所有数据
+        /// </summary>
+        /// <param name="table">CloudTable</param>
+        /// <param name="partitionKey">分区名称</param>
+        /// <returns></returns>
+        public static async Task<List<WorkerModel>> PartitionScanAsync(CloudTable table, string partitionKey)
+        {
+            TableQuery<WorkerModel> partitionScanQuery =
+                    new TableQuery<WorkerModel>().Where(TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, partitionKey));
+            TableContinuationToken token = null;
+            TableQuerySegment<WorkerModel> segment = await table.ExecuteQuerySegmentedAsync(partitionScanQuery, token);
+            List<WorkerModel> entitys = new List<WorkerModel>();
+            entitys.AddRange(segment);
+            return entitys;
         }
     }
 }

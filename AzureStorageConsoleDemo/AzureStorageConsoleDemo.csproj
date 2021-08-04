@@ -18,9 +18,4 @@
     </None>
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="AzureBlobDemo\" />
-    <Folder Include="AzureQueueDemo\" />
-  </ItemGroup>
-
 </Project>
