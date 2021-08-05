@@ -31,3 +31,9 @@ D:\Demo\AzureStorageConsoleDemo\AzureStorageConsoleDemo\obj\Debug\netcoreapp3.1\
 D:\Demo\AzureStorageConsoleDemo\AzureStorageConsoleDemo\obj\Debug\netcoreapp3.1\AzureStorageConsoleDemo.pdb
 D:\Demo\AzureStorageConsoleDemo\AzureStorageConsoleDemo\obj\Debug\netcoreapp3.1\AzureStorageConsoleDemo.genruntimeconfig.cache
 D:\Demo\AzureStorageConsoleDemo\AzureStorageConsoleDemo\bin\Debug\netcoreapp3.1\Settings.json
+D:\Demo\AzureStorageConsoleDemo\AzureStorageConsoleDemo\bin\Debug\netcoreapp3.1\Azure.Core.dll
+D:\Demo\AzureStorageConsoleDemo\AzureStorageConsoleDemo\bin\Debug\netcoreapp3.1\Azure.Storage.Common.dll
+D:\Demo\AzureStorageConsoleDemo\AzureStorageConsoleDemo\bin\Debug\netcoreapp3.1\Azure.Storage.Queues.dll
+D:\Demo\AzureStorageConsoleDemo\AzureStorageConsoleDemo\bin\Debug\netcoreapp3.1\Microsoft.Bcl.AsyncInterfaces.dll
+D:\Demo\AzureStorageConsoleDemo\AzureStorageConsoleDemo\bin\Debug\netcoreapp3.1\System.Memory.Data.dll
+D:\Demo\AzureStorageConsoleDemo\AzureStorageConsoleDemo\bin\Debug\netcoreapp3.1\System.Text.Encodings.Web.dll
